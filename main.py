@@ -14,11 +14,13 @@ class Character(Actor):
         self.velocity_y = 0
         self.velocity_x = 2
         self.on_ground = False
-        self.run_images = []
+        self.run_img_right = []
+        self.run_img_left = []
         self.current_frame = 0
         self.animation_speed = 0.6
         self.moving = False
         self.jumping = False
+        self.flip = False
         
 
     def limit_moviment(self, WIDTH):
@@ -26,11 +28,13 @@ class Character(Actor):
             self.x = self.original_x
 
     def move_right(self, WIDTH):
+        self.flip = False
         self.x += self.velocity_x
         self.moving = True  
         self.limit_moviment(WIDTH)
 
     def move_left(self, WIDTH):
+          self.flip = True
           self.x -= self.velocity_x
           self.moving = True
           self.limit_moviment(WIDTH)
@@ -58,22 +62,32 @@ class Character(Actor):
          if not self.on_ground:
             self.image = 'p_jump__004'
 
-    def update_animation(self, idle_image):
+    def update_animation(self, idle_image, jump_right, jump_left):
          if self.moving:
              self.current_frame += self.animation_speed
-             if self.current_frame > len(self.run_images):
-                self.current_frame = 0
+             if self.flip :
+                if self.current_frame > len(self.run_img_left):
+                    self.current_frame = 0
 
-             self.image = self.run_images[int(self.current_frame)]
+                self.image = self.run_img_left[int(self.current_frame)]
+             else:
+                if self.current_frame > len(self.run_img_right):
+                    self.current_frame = 0
+
+                self.image = self.run_img_right[int(self.current_frame)]
     
          else:
              self.image = idle_image
 
          if not self.on_ground:
-             self.image = 'p_jump__004'
+             if self.flip:
+                self.image = jump_left
+             else:
+                self.image = jump_right
 
 player = Character("p_idle__000",30, 550)
-player.run_images = ["p_run__000", "p_run__001", "p_run__002", "p_run__003", "p_run__004", "p_run__005", "p_run__006", "p_run__007", "p_run__008", "p_run__009"]
+player.run_img_right = ["p_run__000", "p_run__001", "p_run__002", "p_run__003", "p_run__004", "p_run__005", "p_run__006", "p_run__007", "p_run__008", "p_run__009"]
+player.run_img_left = ["p_run__000_left", "p_run__001_left", "p_run__002_left", "p_run__003_left", "p_run__004_left", "p_run__005_left", "p_run__006_left", "p_run__007_left", "p_run__008_left", "p_run__009_left"]
 
 def update():
     player.update_position()
@@ -89,7 +103,7 @@ def update():
     
     player.check_ground_collision("p_jump__004")
 
-    player.update_animation('p_idle__000')  
+    player.update_animation('p_idle__000', 'p_jump__004', 'p_jump__004_left')  
 
 def on_key_down(key):
      if key == key.SPACE and player.on_ground:
