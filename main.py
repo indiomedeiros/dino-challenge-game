@@ -1,11 +1,13 @@
 import pgzrun
 import random
 
+
 WIDTH = 1280
 HEIGHT = 720
-
+TITLE = "Ninja Dino Challenge"
 
 class Character(Actor):
+    
     def __init__(self, image, x, y):
         super().__init__(image)
         self.x = x
@@ -28,21 +30,21 @@ class Character(Actor):
     def reset_moviment(self):
         self.moving = False
 
-    def limit_moviment(self, WIDTH):
-        if self.x < 30 or self.x > WIDTH - 30:
+    def limit_moviment(self, width):
+        if self.x < 30 or self.x > width - 30:
             self.x = self.original_x
 
-    def move_right(self, WIDTH):
+    def move_right(self, width):
         self.flip = False
         self.x += self.velocity_x
         self.moving = True
-        self.limit_moviment(WIDTH)
+        self.limit_moviment(width)
 
-    def move_left(self, WIDTH):
+    def move_left(self, width):
         self.flip = True
         self.x -= self.velocity_x
         self.moving = True
-        self.limit_moviment(WIDTH)
+        self.limit_moviment(width)
 
     def update_position(self):
         self.original_x = self.x
@@ -85,7 +87,6 @@ class Character(Actor):
                 self.x = reset_x
                 self.y = reset_y
                 self.life -= damage
-        
 
     def update_animation(self, idle_image, jump_right, jump_left):
         if self.moving:
@@ -100,7 +101,6 @@ class Character(Actor):
                     self.current_frame = 0
 
                 self.image = self.run_img_right[int(self.current_frame)]
-
         else:
             self.image = idle_image
 
@@ -130,6 +130,7 @@ class Enemy(Character):
         self.velocity_x = 1.2
 
     def ai_moviment(self, move):
+        """Lógica de movimento do inimigo."""
         choice = random.randint(1, 3)
         if self.move_count > 0:
             self.update_position()
@@ -137,7 +138,6 @@ class Enemy(Character):
 
             if self.move_count < move / 2:
                 self.move_right(WIDTH)
-
             else:
                 self.move_left(WIDTH)
         elif choice == 1:
@@ -146,7 +146,7 @@ class Enemy(Character):
             self.jump(-10)
 
 
-class Dino(Enemy):
+class Dino(Enemy):    
     def __init__(self, x, y):
         super().__init__("dino_idle1_left", x, y)
         self.load_run_sprites('dino', '_run', '', 1, 8)
@@ -166,8 +166,7 @@ class Stage:
         self.position_enemy = [750, 500, 250, 1000, 900, 350]
         self.grounds = []
         self.complete = False
-        self.level = 2 #Changes the stage level, reaching up to number 5
-        
+        self.level = 2  # Changes the stage level, reaching up to number 5
 
     def generate_stage(self):
         for index in range(self.level):
@@ -180,11 +179,12 @@ class Stage:
             ground.y = HEIGHT - 7
             self.grounds.append(ground)
 
-        self.finish = Actor('flag_finish', (  WIDTH - 64, 662))
+        self.finish = Actor('flag_finish', (WIDTH - 64, 662))
 
 
+# Inicialização do jogo
 stage = Stage()
-stage.generate_stage() 
+stage.generate_stage()
 game_state = "menu"
 option_selected = 0
 sounds.background_intro.play(-1)
@@ -195,6 +195,7 @@ player.load_run_sprites('p', '_run__00', '_left', 0, 9)
 
 
 def update():
+    """Atualiza o estado do jogo a cada frame."""
     player.update_position()
     player.reset_moviment()
 
@@ -205,10 +206,9 @@ def update():
         player.move_left(WIDTH)
 
     player.apply_gravity(0.5)
-
     player.check_ground_collision("p_jump__004", 1000, stage.grounds, 46)
-
     player.update_animation('p_idle__000', 'p_jump__004', 'p_jump__004_left')
+    
     for enemy in stage.enemy_list:
         enemy.update(stage.grounds)
 
@@ -221,85 +221,110 @@ def update():
 
 
 def on_key_down(key):
+    """Lida com eventos de teclado."""
     global option_selected, game_state
 
-    if key == key.SPACE and player.on_ground:
+    if key == keys.SPACE and player.on_ground:
         player.jump(-10.3)
-    if key == key.F5 and player.life == 0 or stage.complete:
+    if key == keys.F5 and (player.life == 0 or stage.complete):
         player.reset_game(5)
         stage.complete = False
         sounds.play_game_sound.play()
         sounds.stage_one.play()
-        
+    if key == keys.ESCAPE:
+        quit()
 
     if game_state == "menu":
-
-        if key == key.DOWN:
+        if key == keys.DOWN:
             sounds.menu_select_sound.play()
             option_selected = (option_selected + 1) % 2
-        elif key == key.UP:
+        elif key == keys.UP:
             sounds.menu_select_sound.play()
             option_selected = (option_selected - 1) % 2
 
-        if key == key.RETURN:
-            if option_selected == 0 :
+        if key == keys.RETURN:
+            if option_selected == 0:
                 sounds.background_intro.stop()
                 sounds.play_game_sound.play()
                 game_state = "scene_one"
                 sounds.stage_one.play()
             elif option_selected == 1:
                 quit()
-        
-        
+
+
 def draw():
     screen.fill((140, 201, 225))
 
     for ground in stage.grounds:
-            ground.draw()
+        ground.draw()
 
     if game_state == "menu":
         screen.draw.text(
             "Iniciar o Game",
-            color = (143, 75, 8) if option_selected == 0 else "black",
-            center = (WIDTH/2, HEIGHT/2),
-            fontsize = 70 if option_selected == 0 else 50,
-            fontname = "title"
-            
+            color=(143, 75, 8) if option_selected == 0 else "black",
+            center=(WIDTH/2, HEIGHT/2),
+            fontsize=70 if option_selected == 0 else 50,
+            fontname="title"
         )
         
         screen.draw.text(
             "SAIR",
-            color = (143, 75, 8) if option_selected == 1 else "black",
-            center = (WIDTH/2, HEIGHT/2 + 50),
-            fontsize = 70 if option_selected == 1 else 50,
-            fontname = "title"
+            color=(143, 75, 8) if option_selected == 1 else "black",
+            center=(WIDTH/2, HEIGHT/2 + 50),
+            fontsize=70 if option_selected == 1 else 50,
+            fontname="title"
         )
-    
     else:
-        
         for enemy in stage.enemy_list:
             enemy.draw()
 
         stage.finish.draw()
 
-        if player.life > 0 and stage.complete == False:
+        if player.life > 0 and not stage.complete:
             sounds.game_win.stop()
             player.draw()
-            screen.draw.text(" Vida: " + str(player.life), [30, 30], color=(0, 0, 0), fontsize=40)
+            screen.draw.text(
+                " Vida = " + str(player.life),
+                [30, 30], color="black", fontsize=60
+            )
+            screen.draw.text("""
+                CONTROLES:
+                Setas do teclado = Movimentar para esquerda/direita.
+                Espaço  = Pular
+                ESC = Sair do jogo
 
+                OBJETIVO:
+                Capture a bandeira!""",
+                [0, 100], color="black", fontsize=20
+            )
         elif stage.complete:
-            screen.draw.text("Parabéns, Vitória!", [WIDTH / 4, HEIGHT / 2], color=(0, 0, 0), fontsize=120)
-            screen.draw.text("Aperte F5 para reiniciar", [WIDTH / 4, HEIGHT / 2 + 100], color=(0, 0, 0), fontsize=60)
+            screen.draw.text(
+                "Parabéns, Vitória!",
+                [WIDTH / 4, HEIGHT / 2],
+                color=(0, 0, 0),
+                fontsize=120
+            )
+            screen.draw.text(
+                "Aperte F5 para reiniciar",
+                [WIDTH / 4, HEIGHT / 2 + 100],
+                color=(0, 0, 0),
+                fontsize=60
+            )
             sounds.stage_one.stop()
-            
-
         else:
-            screen.draw.text("GAME OVER!", [WIDTH / 4, HEIGHT / 2], color=(0, 0, 0), fontsize=120)
-            screen.draw.text("Aperte F5 para reiniciar", [WIDTH / 4, HEIGHT / 2 + 100], color=(0, 0, 0), fontsize=60)
+            screen.draw.text(
+                "GAME OVER!",
+                [WIDTH / 4, HEIGHT / 2],
+                color=(0, 0, 0),
+                fontsize=120
+            )
+            screen.draw.text(
+                "Aperte F5 para reiniciar",
+                [WIDTH / 4, HEIGHT / 2 + 100],
+                color=(0, 0, 0),
+                fontsize=60
+            )
             sounds.stage_one.stop()
-                 
+
 
 pgzrun.go()
-
-
-
