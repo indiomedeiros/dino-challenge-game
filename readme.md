@@ -2,6 +2,7 @@
 
 ## 📌 Visão Geral
 Jogo de plataforma 2D desenvolvido em Python com Pygame Zero. Controle um personagem que deve navegar por um cenário, evitar inimigos e alcançar a bandeira no final do nível.
+![alt text](dino_challenger.gif)
 
 ## 🛠️ Requisitos
 - Python 3.7+
