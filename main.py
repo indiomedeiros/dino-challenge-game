@@ -20,8 +20,11 @@ class Character(Actor):
         self.on_ground = False
         self.run_img_right = []
         self.run_img_left = []
+        self.idle_img_list = []
         self.current_frame = 0
+        self.current_frame_idle = 0
         self.animation_speed = 0.6
+        self.animation_speed_idle = 0.04
         self.moving = False
         self.jumping = False
         self.flip = False
@@ -88,8 +91,9 @@ class Character(Actor):
                 self.y = reset_y
                 self.life -= damage
 
-    def update_animation(self, idle_image, jump_right, jump_left):
+    def update_animation(self, jump_right, jump_left):
         if self.moving:
+            #running character animation
             self.current_frame += self.animation_speed
             if self.flip:
                 if self.current_frame > len(self.run_img_left):
@@ -102,24 +106,32 @@ class Character(Actor):
 
                 self.image = self.run_img_right[int(self.current_frame)]
         else:
-            self.image = idle_image
+            #animation of the character standing still and breathing
+            self.current_frame_idle += self.animation_speed_idle
+            if self.current_frame_idle > len(self.idle_img_list):
+                self.current_frame_idle = 0
+            else:
+                self.image = self.idle_img_list[int(self.current_frame_idle)]
 
         if not self.on_ground:
+            #changes the direction of the jump
             if self.flip:
                 self.image = jump_left
             else:
                 self.image = jump_right
 
-    def load_run_sprites(self, prefix, default, sufix, frame_start, frame_end):
-        run_images = []
+    def load_sprites(self, prefix, default, sufix, frame_start, frame_end):
+        images = []
         for frame in range(frame_start, frame_end):
             sprite_name = f"{prefix}{default}{frame}{sufix}"
-            run_images.append(sprite_name)
-
-        if 'left' in sufix:
-            self.run_img_left = run_images
+            images.append(sprite_name)
+        
+        if "idle" in default:
+            self.idle_img_list = images
+        elif 'left' in sufix:
+            self.run_img_left = images
         else:
-            self.run_img_right = run_images
+            self.run_img_right = images
 
 
 class Enemy(Character):
@@ -130,7 +142,6 @@ class Enemy(Character):
         self.velocity_x = 1.2
 
     def ai_moviment(self, move):
-        """Lógica de movimento do inimigo."""
         choice = random.randint(1, 3)
         if self.move_count > 0:
             self.update_position()
@@ -149,14 +160,14 @@ class Enemy(Character):
 class Dino(Enemy):    
     def __init__(self, x, y):
         super().__init__("dino_idle1_left", x, y)
-        self.load_run_sprites('dino', '_run', '', 1, 8)
-        self.load_run_sprites('dino', '_run', '_left', 1, 8)
+        self.load_sprites('dino', '_run', '', 1, 8)
+        self.load_sprites('dino', '_run', '_left', 1, 8)
 
     def update(self, grounds):
         self.reset_moviment()
         self.ai_moviment(200)
         self.apply_gravity(0.5)
-        self.update_animation('dino_idle1_left', 'dino_jump5', 'dino_jump5_left')
+        self.update_animation('dino_jump5', 'dino_jump5_left')
         self.check_ground_collision('dino_jump5_left', 676, grounds, 39)
 
 
@@ -190,12 +201,12 @@ option_selected = 0
 sounds.background_intro.play(-1)
 
 player = Character("p_idle__000", 30, 550)
-player.load_run_sprites('p', '_run__00', '', 0, 9)
-player.load_run_sprites('p', '_run__00', '_left', 0, 9)
+player.load_sprites('p', '_run__00', '', 0, 9)
+player.load_sprites('p', '_run__00', '_left', 0, 9)
+player.load_sprites('p', '_idle__00','', 0, 2)
 
 
 def update():
-    """Atualiza o estado do jogo a cada frame."""
     player.update_position()
     player.reset_moviment()
 
@@ -207,7 +218,7 @@ def update():
 
     player.apply_gravity(0.5)
     player.check_ground_collision("p_jump__004", 1000, stage.grounds, 46)
-    player.update_animation('p_idle__000', 'p_jump__004', 'p_jump__004_left')
+    player.update_animation('p_jump__004', 'p_jump__004_left')
     
     for enemy in stage.enemy_list:
         enemy.update(stage.grounds)
@@ -221,7 +232,6 @@ def update():
 
 
 def on_key_down(key):
-    """Lida com eventos de teclado."""
     global option_selected, game_state
 
     if key == keys.SPACE and player.on_ground:
