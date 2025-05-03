@@ -67,7 +67,7 @@ dino-challenge-game/
 O jogo espera encontrar os seguintes arquivos:
 
 ### Imagens:
-- `p_idle__000.png` (personagem principal)
+- `p_idle__00[0-1].png` (animação ao ficar parado)
 - `p_run__00[0-9].png` (animação de corrida)
 - `p_jump__004.png` (pulo)
 - `dino_*.png` (sprites do inimigo)
@@ -75,14 +75,14 @@ O jogo espera encontrar os seguintes arquivos:
 - `flag_finish.png` (bandeira final)
 
 ### Sons:
-- `background_intro.wav` (música de fundo)
+- `background_intro.wav` (música de fundo inicial)
 - `game_win.wav` (vitória)
 - `damage.wav` (dano)
 - `menu_select_sound.wav` (seleção no menu)
 
 ## 📝 Personalização
 Você pode modificar:
-- `self.level` em `Stage` para mudar a dificuldade (tem 5)
+- `self.level` em `Stage` para mudar a dificuldade (tem até o 5 e é bem dificil)
 - Valores de gravidade e velocidade no `Character`
 
 ## 🐛 Reportar Problemas
