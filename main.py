@@ -195,8 +195,9 @@ class Stage:
 
 # Inicialização do jogo
 stage = Stage()
-stage.generate_stage()
+
 game_state = "menu"
+stage.generate_stage()
 option_selected = 0
 sounds.background_intro.play(-1)
 
@@ -264,7 +265,6 @@ def on_key_down(key):
 
 def draw():
     screen.fill((140, 201, 225))
-
     for ground in stage.grounds:
         ground.draw()
 
@@ -310,29 +310,29 @@ def draw():
         elif stage.complete:
             screen.draw.text(
                 "Parabéns, Vitória!",
-                [WIDTH / 4, HEIGHT / 2],
-                color=(0, 0, 0),
+                center=(WIDTH/2, HEIGHT/2),
+                color="black",
                 fontsize=120
             )
             screen.draw.text(
                 "Aperte F5 para reiniciar",
-                [WIDTH / 4, HEIGHT / 2 + 100],
-                color=(0, 0, 0),
-                fontsize=60
+                center=(WIDTH/2, HEIGHT/2 + 50),
+                color="black",
+                fontsize=40
             )
             sounds.stage_one.stop()
         else:
             screen.draw.text(
                 "GAME OVER!",
-                [WIDTH / 4, HEIGHT / 2],
-                color=(0, 0, 0),
+                center=(WIDTH/2, HEIGHT/2),
+                color="red",
                 fontsize=120
             )
             screen.draw.text(
                 "Aperte F5 para reiniciar",
-                [WIDTH / 4, HEIGHT / 2 + 100],
-                color=(0, 0, 0),
-                fontsize=60
+                center=(WIDTH/2, HEIGHT/2 + 50),
+                color="black",
+                fontsize=40
             )
             sounds.stage_one.stop()
 
